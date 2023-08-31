@@ -8,7 +8,8 @@
 var CSParameters = {
    QVal: 0,
    targetView1: undefined,
-   targetView2: undefined
+   targetView2: undefined,
+   targetView3: undefined
 }
 
 // function to apply the pixelmath
@@ -53,7 +54,29 @@ function applyCS(view1, view2, Q) {
     */
    P.executeOn(view1)
 
+   Console.writeln(P.newImageId)
+
 }
+
+
+// Function to apply the STF
+function applyNBSTF(pureView, nbView) {
+
+   Console.writeln("Applying STF");
+
+   var P = new ScreenTransferFunction;
+   P.STF = [ // c0, c1, m, r0, r1
+      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
+      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
+      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
+      [0.00000, 1.00000, 0.50000, 0.00000, 1.00000]
+   ];
+   P.interaction = ScreenTransferFunction.prototype.Grayscale;
+
+   P.executeOn(pureView);
+
+}
+
 
 
 /*
@@ -132,13 +155,38 @@ function CSDialog() {
    // 2. sets a fixed width
    // 3. sets the onClick function
    this.execButton = new PushButton(this);
-   this.execButton.text = "Execute";
+   this.execButton.text = "Subtract";
    this.execButton.width = 40;
    this.execButton.onClick = () => {
       // this.ok();
       Console.writeln("click!");
       applyCS(CSParameters.targetView1, CSParameters.targetView2, CSParameters.QVal);
    };
+
+      // third view picker to apply STF
+   this.viewList3 = new ViewList(this);
+   this.viewList3Lab = new Label(this);
+   this.viewList3Lab.text = "Optional - apply narrowband image STF to: "
+   this.viewList3.getAll();
+   this.viewList3.toolTip = "Continuum image";
+   CSParameters.targetView3 = this.viewList3.currentView;
+   this.viewList3.onViewSelected = function (view) {
+      CSParameters.targetView3 = view;
+   }
+
+   // prepare the execution button to apply STF
+   // 1. sets the text
+   // 2. sets a fixed width
+   // 3. sets the onClick function
+   this.stfButton = new PushButton(this);
+   this.stfButton.text = "Apply STF";
+   this.stfButton.width = 40;
+   this.stfButton.onClick = () => {
+      // this.ok();
+      Console.writeln("clicked STF button!");
+      applyNBSTF(CSParameters.targetView3, CSParameters.targetView1);
+   };
+
 
    // text with signature
    this.signature = new Label(this);
@@ -158,6 +206,12 @@ function CSDialog() {
    this.sizer.add(this.QValControl);
    this.sizer.add(this.execButton);
    this.sizer.setAlignment(this.execButton, Align_Right);
+   this.sizer.addSpacing(10);
+   this.sizer.add(this.viewList3Lab);
+   this.sizer.add(this.viewList3);
+   this.sizer.addSpacing(10);
+   this.sizer.add(this.stfButton);
+   this.sizer.setAlignment(this.stfButton, Align_Right);
    this.sizer.add(this.signature);
    this.sizer.addStretch();
 }
@@ -173,11 +227,11 @@ function showDialog() {
 function main() {
    Console.hide();
    let retVal = showDialog();
-   Console.hide();
+   // Console.hide();
    Console.writeln("Returned value: ", retVal)
-   Console.hide();
+   // Console.hide();
    if (retVal == 1) {
-      // perform transformation
+      // perform
       Console.writeln("Parameters: " + CSParameters.QVal, " ",
          CSParameters.targetView1.id, " ", CSParameters.targetView2.id);
       // below function was moved to the execbutton onclick as to not close the dialog each time
