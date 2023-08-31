@@ -77,7 +77,6 @@ function transferSTF(destView, sourceView) {
 
 
 // Function to apply the pixelmath for the boost
-
 function applyBoost(contView, subView, boostVal) {
    var P = new PixelMath;
    P.expression = contView.id + "+("+subView.id+"-Med("+subView.id+"))*"+boostVal;
@@ -139,17 +138,20 @@ function CSDialog() {
    this.title = new TextBox(this);
    this.title.text = "<b>Continuum Subtraction</b><br><br>This script subtracts" +
                      " a continuum image from a narrowband image with the following formula:<br>" +
-                     "<br><i>narrowband - Q*( continuum - med(continuum) )</i>";
+                     "<br><i>narrowband - Q * (continuum - med(continuum))</i><br>"+
+                     "<br>It also boosts the purified image back into the continuum with the following formula:"+
+                     "<br><br><i>continuum + B * (purified - med(purified))</i>";
    this.title.readOnly = true;
-   this.title.minHeight = 100;
-   this.title.maxHeight = 100;
+   this.title.minHeight = 180;
+   this.title.maxHeight = 180;
 
    // add a view picker
    // 1. retrieve the whole view list (images and previews)
    // 2. sets the initially selected view
    // 3. sets the selection callback: the target view becomes the selected view
    this.viewList1Lab = new Label(this);
-   this.viewList1Lab.text = "Narrowband: "
+   this.viewList1Lab.useRichText = true;
+   this.viewList1Lab.text = "<b>Narrowband:</b>";
    this.viewList1 = new ViewList(this);
    this.viewList1.getAll();
    this.viewList1.toolTip = "Narrowband image";
@@ -161,7 +163,8 @@ function CSDialog() {
    // second view picker
    this.viewList2 = new ViewList(this);
    this.viewList2Lab = new Label(this);
-   this.viewList2Lab.text = "Continuum: "
+   this.viewList2Lab.useRichText = true;
+   this.viewList2Lab.text = "<b>Continuum:</b>";
    this.viewList2.getAll();
    this.viewList2.toolTip = "Continuum image";
    CSParameters.targetView2 = this.viewList2.currentView;
@@ -204,7 +207,8 @@ function CSDialog() {
    // third view picker to apply STF
    this.viewList3 = new ViewList(this);
    this.viewList3Lab = new Label(this);
-   this.viewList3Lab.text = "Select continuum subtracted view: "
+   this.viewList3Lab.useRichText = true;
+   this.viewList3Lab.text = "<b>Select continuum subtracted view: </b>";
    this.viewList3.getAll();
    this.viewList3.toolTip = "Continuum subtracted view";
    CSParameters.targetView3 = this.viewList3.currentView;
@@ -233,7 +237,7 @@ function CSDialog() {
    // 6. sets a tooltip text
    // 7. defines the behaviour on value change
    this.boostControl = new NumericControl(this);
-   this.boostControl.label.text = "Boost = ";
+   this.boostControl.label.text = "B = ";
    this.boostControl.label.width = 60;
    this.boostControl.setRange(0, 20);
    this.boostControl.setPrecision( 1 );
@@ -259,7 +263,8 @@ function CSDialog() {
    // fourth view picker to apply STF to boosted
    this.viewList4 = new ViewList(this);
    this.viewList4Lab = new Label(this);
-   this.viewList4Lab.text = "Select boosted view: "
+   this.viewList4Lab.useRichText = true;
+   this.viewList4Lab.text = "<b>Select boosted view: </b>";
    this.viewList4.getAll();
    this.viewList4.toolTip = "Boosted view";
    CSParameters.targetView4 = this.viewList4.currentView;
@@ -281,7 +286,8 @@ function CSDialog() {
 
    // text with signature
    this.signature = new Label(this);
-   this.signature.text = "Alexander Reinartz - 2023"
+   this.signature.useRichText = true;
+   this.signature.text = "<i>Alexander Reinartz - 2023</i>";
 
    // layout the dialog
    this.sizer = new VerticalSizer;
