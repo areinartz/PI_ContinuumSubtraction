@@ -9,10 +9,12 @@ var CSParameters = {
    QVal: 0,
    targetView1: undefined,
    targetView2: undefined,
-   targetView3: undefined
+   targetView3: undefined,
+   targetView4: undefined,
+   boostVal: 0
 }
 
-// function to apply the pixelmath
+// function to apply the pixelmath for the subtraction
 function applyCS(view1, view2, Q) {
 
    Console.writeln(view1.id, view2.id, Q);
@@ -54,29 +56,66 @@ function applyCS(view1, view2, Q) {
     */
    P.executeOn(view1)
 
-   Console.writeln(P.newImageId)
-
 }
 
 
-// Function to apply the STF
-function applyNBSTF(pureView, nbView) {
-
-   Console.writeln("Applying STF");
+// Function to apply the STF from one image to another
+function transferSTF(destView, sourceView) {
 
    var P = new ScreenTransferFunction;
    P.STF = [ // c0, c1, m, r0, r1
-      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
-      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
-      [nbView.stf[0][1], 1.00000, nbView.stf[0][0], 0.00000, 1.00000],
+      [sourceView.stf[0][1], 1.00000, sourceView.stf[0][0], 0.00000, 1.00000],
+      [sourceView.stf[0][1], 1.00000, sourceView.stf[0][0], 0.00000, 1.00000],
+      [sourceView.stf[0][1], 1.00000, sourceView.stf[0][0], 0.00000, 1.00000],
       [0.00000, 1.00000, 0.50000, 0.00000, 1.00000]
    ];
    P.interaction = ScreenTransferFunction.prototype.Grayscale;
 
-   P.executeOn(pureView);
+   P.executeOn(destView);
 
 }
 
+
+// Function to apply the pixelmath for the boost
+
+function applyBoost(contView, subView, boostVal) {
+   var P = new PixelMath;
+   P.expression = contView.id + "+("+subView.id+"-Med("+subView.id+"))*"+boostVal;
+   P.expression1 = "";
+   P.expression2 = "";
+   P.expression3 = "";
+   P.useSingleExpression = true;
+   P.symbols = "";
+   P.clearImageCacheAndExit = false;
+   P.cacheGeneratedImages = false;
+   P.generateOutput = true;
+   P.singleThreaded = false;
+   P.optimization = true;
+   P.use64BitWorkingImage = false;
+   P.rescale = false;
+   P.rescaleLower = 0;
+   P.rescaleUpper = 1;
+   P.truncate = true;
+   P.truncateLower = 0;
+   P.truncateUpper = 1;
+   P.createNewImage = true;
+   P.showNewImage = true;
+   P.newImageId = "boosted";
+   P.newImageWidth = 0;
+   P.newImageHeight = 0;
+   P.newImageAlpha = false;
+   P.newImageColorSpace = PixelMath.prototype.SameAsTarget;
+   P.newImageSampleFormat = PixelMath.prototype.SameAsTarget;
+   /*
+    * Read-only properties
+    *
+   P.outputData = [ // globalVariableId, globalVariableRK, globalVariableG, globalVariableB
+   ];
+    */
+
+   P.executeOn(contView)
+
+}
 
 
 /*
@@ -155,38 +194,90 @@ function CSDialog() {
    // 2. sets a fixed width
    // 3. sets the onClick function
    this.execButton = new PushButton(this);
-   this.execButton.text = "Subtract";
+   this.execButton.text = "SUBTRACT";
    this.execButton.width = 40;
    this.execButton.onClick = () => {
       // this.ok();
-      Console.writeln("click!");
       applyCS(CSParameters.targetView1, CSParameters.targetView2, CSParameters.QVal);
    };
 
-      // third view picker to apply STF
+   // third view picker to apply STF
    this.viewList3 = new ViewList(this);
    this.viewList3Lab = new Label(this);
-   this.viewList3Lab.text = "Optional - apply narrowband image STF to: "
+   this.viewList3Lab.text = "Select continuum subtracted view: "
    this.viewList3.getAll();
-   this.viewList3.toolTip = "Continuum image";
+   this.viewList3.toolTip = "Continuum subtracted view";
    CSParameters.targetView3 = this.viewList3.currentView;
    this.viewList3.onViewSelected = function (view) {
       CSParameters.targetView3 = view;
    }
 
-   // prepare the execution button to apply STF
+   // prepare the execution button to apply STF to subtracted image
    // 1. sets the text
    // 2. sets a fixed width
    // 3. sets the onClick function
    this.stfButton = new PushButton(this);
-   this.stfButton.text = "Apply STF";
+   this.stfButton.text = "Optional: apply narrowband STF";
    this.stfButton.width = 40;
    this.stfButton.onClick = () => {
       // this.ok();
-      Console.writeln("clicked STF button!");
-      applyNBSTF(CSParameters.targetView3, CSParameters.targetView1);
+      transferSTF(CSParameters.targetView3, CSParameters.targetView1);
    };
 
+   // create the slider for the line emission boost value
+   // 1. sets the text
+   // 2. stes a fixed label width
+   // 3. sets the range of the value
+   // 4. sets the value precision (number of decimal digits)
+   // 5. sets the range of the slider
+   // 6. sets a tooltip text
+   // 7. defines the behaviour on value change
+   this.boostControl = new NumericControl(this);
+   this.boostControl.label.text = "Boost = ";
+   this.boostControl.label.width = 60;
+   this.boostControl.setRange(0, 20);
+   this.boostControl.setPrecision( 1 );
+   this.boostControl.slider.setRange( 0, 40 );
+   this.boostControl.toolTip = "<p>Controls how much of the continuum subtracted narrowband is added to the synthetic continuum image.</p>";
+   this.boostControl.onValueUpdated = function( value )
+   {
+      CSParameters.boostVal = value;
+   };
+
+   // prepare the execution button to apply boost
+   // 1. sets the text
+   // 2. sets a fixed width
+   // 3. sets the onClick function
+   this.boostButton = new PushButton(this);
+   this.boostButton.text = "BOOST";
+   this.boostButton.width = 40;
+   this.boostButton.onClick = () => {
+      // this.ok();
+      applyBoost(CSParameters.targetView2, CSParameters.targetView3, CSParameters.boostVal);
+   };
+
+   // fourth view picker to apply STF to boosted
+   this.viewList4 = new ViewList(this);
+   this.viewList4Lab = new Label(this);
+   this.viewList4Lab.text = "Select boosted view: "
+   this.viewList4.getAll();
+   this.viewList4.toolTip = "Boosted view";
+   CSParameters.targetView4 = this.viewList4.currentView;
+   this.viewList4.onViewSelected = function (view) {
+      CSParameters.targetView4 = view;
+   }
+
+   // prepare the execution button to apply STF to boosted image
+   // 1. sets the text
+   // 2. sets a fixed width
+   // 3. sets the onClick function
+   this.stfButton2 = new PushButton(this);
+   this.stfButton2.text = "Optional: apply continuum STF";
+   this.stfButton2.width = 40;
+   this.stfButton2.onClick = () => {
+      // this.ok();
+      transferSTF(CSParameters.targetView4, CSParameters.targetView2);
+   };
 
    // text with signature
    this.signature = new Label(this);
@@ -205,19 +296,26 @@ function CSDialog() {
    this.sizer.addSpacing(10);
    this.sizer.add(this.QValControl);
    this.sizer.add(this.execButton);
-   this.sizer.setAlignment(this.execButton, Align_Right);
-   this.sizer.addSpacing(10);
+   this.sizer.setAlignment(this.execButton, Align_Center);
+   this.sizer.addSpacing(20);
    this.sizer.add(this.viewList3Lab);
    this.sizer.add(this.viewList3);
-   this.sizer.addSpacing(10);
+   this.sizer.addSpacing(2);
    this.sizer.add(this.stfButton);
-   this.sizer.setAlignment(this.stfButton, Align_Right);
+   this.sizer.addSpacing(10);
+   this.sizer.add(this.boostControl);
+   this.sizer.add(this.boostButton);
+   this.sizer.setAlignment(this.boostButton, Align_Center);
+   this.sizer.add(this.viewList4Lab);
+   this.sizer.add(this.viewList4);
+   this.sizer.addSpacing(2);
+   this.sizer.add(this.stfButton2);
+   this.sizer.addSpacing(10);
    this.sizer.add(this.signature);
    this.sizer.addStretch();
 }
 
 CSDialog.prototype = new Dialog;
-
 
 function showDialog() {
    let dialog = new CSDialog;
