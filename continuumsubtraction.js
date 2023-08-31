@@ -1,6 +1,11 @@
 // This is a script that takes a narrowband image and a corresponding continuum image
 // and subtracts the later from the former
 
+
+#feature-id    Utilities > Continuum Subtraction
+
+#feature-info  Script to subtract continuum from narrowband and boost the purified signal in the continuum
+
 #include <pjsr/Sizer.jsh>          // needed to instantiate the VerticalSizer and HorizontalSizer objects
 #include <pjsr/NumericControl.jsh> // needed to instantiate the NumericControl control
 
