@@ -2,7 +2,7 @@
 This is a PixInsight script to subtract a continuum image (eg. Red) from a narrowband image (eg. H-alpha) to obtain a purified narrowband image and subsequently add this back into the continuum to boost line-emission specific signal in broadband images.
 
 ## Installation instructions
-1. Copy the continuumsubtraction.js file to your hard drive (eg. in your Pixinsight installation dir under Pixinsight/scr/scripts/ContinuumSubtraction/ )
+1. Copy the continuumsubtraction.js file to your Pixinsight installation dir under Pixinsight/scr/scripts/ContinuumSubtraction/ (although any folder will do)
 2. In Pixinsight: click SCRIPT > Feature Scripts...
 3. In the Feature Scripts dialog: click "Add", locate the script and click "Done"
 
