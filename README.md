@@ -7,7 +7,7 @@ This is a PixInsight script to subtract a continuum image (eg. Red) from a narro
 3. In the Feature Scripts dialog: click "Add", locate the script and click "Done"
 
 ## Usage
-The script can be launched from SCRIPT > Utilities > Continuum Subtraction.
+The script can be launched from SCRIPT > Utilities > ContinuumSubtraction.
 
 A workflow suggestion is to run the script on gradient-corrected images that have had their stars removed, and add the continuum image stars back to the final boosted image.
 
