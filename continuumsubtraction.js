@@ -2,7 +2,7 @@
 // and subtracts the later from the former
 
 
-#feature-id    Utilities > Continuum Subtraction
+#feature-id    Utilities > ContinuumSubtraction
 
 #feature-info  Script to subtract continuum from narrowband and boost the purified signal in the continuum
 
