@@ -8,6 +8,7 @@ This is a PixInsight script to subtract a continuum image (eg. Red) from a narro
 
 ## Usage
 The script can be launched from SCRIPT > Utilities > ContinuumSubtraction.
+It works on images in the linear state, so before stretching.
 
 1. Select the narrowband and continuum image in the respective view lists
 2. Set a value for Q
