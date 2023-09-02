@@ -21,8 +21,9 @@ In practice, it is easier to simply try different values and find the ideal valu
 
 5. Once you are happy with the purified image, select it in "select continuum subtracted view"
 6. Set a value for B, this is the boost factor and depends on your taste. Higher values add more of the purified narrowband to the broadband image
+7. Click BOOST. A new image window will open with the result
 
-7. Optional: for visualization, you can apply an STF to the result without closing the script by selecting the result file in the "select boosted view" selector and click the button to take the STF from the original broadband image. This allows you to inspect the image to optimize the B value from step 6. Note that this STF will be a bit brighter compared to when you would apply auto STF on the result, so might exagerate the visible noise.
+8. Optional: for visualization, you can apply an STF to the result without closing the script by selecting the result file in the "select boosted view" selector and click the button to take the STF from the original broadband image. This allows you to inspect the image to optimize the B value from step 6. Note that this STF will be a bit brighter compared to when you would apply auto STF on the result, so might exagerate the visible noise.
 
 A workflow suggestion is to run the script on gradient-corrected images that have had their stars removed, and add the continuum image stars back to the final boosted image. From then on it can be treated as a normal broadband channel image.
 
